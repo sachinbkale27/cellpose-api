@@ -1,0 +1,15 @@
+# SAM CLI Configuration
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "cellpose-api-prod"
+resolve_s3 = true
+s3_prefix = "cellpose-api"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+resolve_image_repos = true
+parameter_overrides = "Environment=prod"
+
+[default.build.parameters]
+use_container = true

@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Cellpose API - Cell Segmentation Lambda Function
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues:
+      - dev
+      - prod
+
+Globals:
+  Function:
+    Timeout: 300  # 5 minutes for large images
+    MemorySize: 4096  # 4GB for model loading
+
+Resources:
+  CellposeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      FunctionName: !Sub cellpose-api-${Environment}
+      Description: Cellpose cell segmentation API
+      Environment:
+        Variables:
+          PYTHONUNBUFFERED: "1"
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins:
+            - "*"
+          AllowMethods:
+            - "*"
+          AllowHeaders:
+            - "*"
+          MaxAge: 3600
+    Metadata:
+      Dockerfile: Dockerfile.lambda
+      DockerContext: .
+      DockerTag: latest
+
+Outputs:
+  CellposeFunctionUrl:
+    Description: Cellpose API Function URL
+    Value: !GetAtt CellposeFunctionUrl.FunctionUrl
+
+  CellposeFunctionArn:
+    Description: Cellpose Lambda Function ARN
+    Value: !GetAtt CellposeFunction.Arn
