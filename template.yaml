@@ -33,14 +33,7 @@ Resources:
           HOME: "/tmp"
       FunctionUrlConfig:
         AuthType: NONE
-        Cors:
-          AllowOrigins:
-            - "*"
-          AllowMethods:
-            - "*"
-          AllowHeaders:
-            - "*"
-          MaxAge: 3600
+        # CORS handled by FastAPI middleware - don't duplicate headers
     Metadata:
       Dockerfile: Dockerfile.lambda
       DockerContext: .
