@@ -4,9 +4,11 @@ mangum==0.17.0
 python-multipart==0.0.6
 pydantic>=2.0.0
 
-# Image processing (numpy/scipy installed separately in Dockerfile)
-opencv-python-headless==4.9.0.80
-Pillow==10.2.0
+# Scientific packages
+numpy>=1.24.0,<2.0
+scipy>=1.10.0
+opencv-python-headless>=4.8.0
+Pillow>=10.0.0
 
 # PyTorch CPU-only for smaller image size
 --extra-index-url https://download.pytorch.org/whl/cpu
