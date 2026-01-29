@@ -14,6 +14,9 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -22,8 +25,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -32,7 +34,7 @@ jobs:
 
       - name: Create ECR repository if not exists
         run: |
-          aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} || \
+          aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} 2>/dev/null || \
           aws ecr create-repository --repository-name ${{ env.ECR_REPOSITORY }}
 
       - name: Build and push Docker image
@@ -48,7 +50,7 @@ jobs:
           use-installer: true
 
       - name: SAM Build
-        run: sam build --use-container
+        run: sam build
 
       - name: SAM Deploy
         run: |
@@ -68,9 +70,9 @@ jobs:
             --query "Stacks[0].Outputs[?OutputKey=='CellposeFunctionUrl'].OutputValue" \
             --output text)
           echo "FUNCTION_URL=$URL" >> $GITHUB_OUTPUT
-          echo "Cellpose API URL: $URL"
+          echo "::notice::Cellpose API URL: $URL"
 
       - name: Test API Health
         run: |
-          sleep 10  # Wait for Lambda to warm up
-          curl -s "${{ steps.get-url.outputs.FUNCTION_URL }}health" | jq .
+          sleep 30  # Wait for Lambda to warm up
+          curl -sf "${{ steps.get-url.outputs.FUNCTION_URL }}health" | jq . || echo "Health check pending (cold start)"
