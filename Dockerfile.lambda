@@ -1,24 +1,37 @@
 # Cellpose API - AWS Lambda Container Image
+# Using multi-stage build to avoid compilation issues
+
+# Stage 1: Build dependencies in a full Python image
+FROM python:3.11-slim as builder
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --upgrade pip
+
+# Install all Python packages in a virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements-lambda.txt .
+RUN pip install --no-cache-dir -r requirements-lambda.txt
+
+# Stage 2: Lambda runtime
 FROM public.ecr.aws/lambda/python:3.11
 
-# Install system dependencies for OpenCV
+# Install runtime dependencies for OpenCV
 RUN yum install -y \
     mesa-libGL \
     && yum clean all
 
-# Upgrade pip
-RUN pip install --upgrade pip
-
-# Install numpy and scipy first (pre-built wheels)
-RUN pip install --no-cache-dir \
-    "numpy<2.0" \
-    "scipy>=1.10.0,<1.14.0"
-
-# Copy requirements (without numpy/scipy since already installed)
-COPY requirements-lambda.txt ${LAMBDA_TASK_ROOT}/
-
-# Install remaining Python dependencies
-RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-lambda.txt
+# Copy installed packages from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONPATH="/opt/venv/lib/python3.11/site-packages:$PYTHONPATH"
 
 # Copy application code
 COPY main.py ${LAMBDA_TASK_ROOT}/
