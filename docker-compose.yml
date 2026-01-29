@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  cellpose-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Mount for development - remove in production
+      - ./main.py:/app/main.py
+    restart: unless-stopped
+    # For GPU support (optional), uncomment below:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
