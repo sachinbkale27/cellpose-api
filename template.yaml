@@ -29,6 +29,8 @@ Resources:
           PYTHONUNBUFFERED: "1"
           NUMBA_CACHE_DIR: "/tmp"
           MPLCONFIGDIR: "/tmp"
+          CELLPOSE_LOCAL_MODELS_PATH: "/tmp/cellpose_models"
+          HOME: "/tmp"
       FunctionUrlConfig:
         AuthType: NONE
         Cors:
