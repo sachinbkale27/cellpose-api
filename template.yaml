@@ -27,6 +27,8 @@ Resources:
       Environment:
         Variables:
           PYTHONUNBUFFERED: "1"
+          NUMBA_CACHE_DIR: "/tmp"
+          MPLCONFIGDIR: "/tmp"
       FunctionUrlConfig:
         AuthType: NONE
         Cors:
