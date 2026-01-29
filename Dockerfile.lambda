@@ -14,9 +14,9 @@ RUN yum install -y \
 # Upgrade pip
 RUN pip install --upgrade pip
 
-# Copy and install requirements
+# Copy and install requirements (prefer pre-built wheels)
 COPY requirements-lambda.txt .
-RUN pip install --no-cache-dir -r requirements-lambda.txt
+RUN pip install --no-cache-dir --prefer-binary -r requirements-lambda.txt
 
 # Copy application code
 COPY main.py ${LAMBDA_TASK_ROOT}/
