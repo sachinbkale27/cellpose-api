@@ -1,21 +1,23 @@
 # Cellpose API - AWS Lambda Container Image
 FROM public.ecr.aws/lambda/python:3.11
 
-# Install system dependencies for OpenCV and compilation
+# Install system dependencies for OpenCV
 RUN yum install -y \
     mesa-libGL \
-    gcc \
-    gcc-c++ \
-    make \
     && yum clean all
 
 # Upgrade pip
 RUN pip install --upgrade pip
 
-# Copy requirements
+# Install numpy and scipy first (pre-built wheels)
+RUN pip install --no-cache-dir \
+    "numpy<2.0" \
+    "scipy>=1.10.0,<1.14.0"
+
+# Copy requirements (without numpy/scipy since already installed)
 COPY requirements-lambda.txt ${LAMBDA_TASK_ROOT}/
 
-# Install Python dependencies
+# Install remaining Python dependencies
 RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-lambda.txt
 
 # Copy application code
